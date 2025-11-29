@@ -39,16 +39,16 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ⚠️ RUTAS PÚBLICAS PARA REGISTRO Y TIENDA ⚠️
+                        // ⚠️ RUTAS PÚBLICAS ⚠️
                         .requestMatchers(
-                                "/api/auth/register", // FIX: Permite el registro de usuarios
+                                "/api/auth/register",  // Permitir el registro
                                 "/api/auth/login",
-                                "/api/productos",
-                                "/api/categorias",
+                                "/api/productos",      // Permite ver la tienda sin login
+                                "/api/categorias",     // Permite cargar las categorías sin login
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        // Cualquier otra solicitud requiere un token JWT válido
+                        // El resto de la API requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
