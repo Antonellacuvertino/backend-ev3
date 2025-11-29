@@ -1,45 +1,44 @@
 package com.catsshop.cats_shop_backend.service;
 
+import com.catsshop.cats_shop_backend.model.Role; // Asegúrate de importar Role
 import com.catsshop.cats_shop_backend.model.User;
 import com.catsshop.cats_shop_backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional; // Importa si usas esta anotación
-
-import java.time.LocalDateTime;
+import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor // Usado para inyección automática de dependencias
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
 
-    @Transactional
-    public User registerNewUser(String username, String rawPassword) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("El nombre de usuario o email ya existe.");
-        }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-        User newUser = new User();
-        newUser.setUsername(username);
+    public User registerNewUser(User newUser) {
+        // Codificar la contraseña antes de guardar
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
-        // ⚠️ CORRECCIÓN CRÍTICA: CODIFICAR LA CONTRASEÑA ⚠️
-        newUser.setPassword(passwordEncoder.encode(rawPassword));
+        // El error estaba aquí: si el DTO tiene un String 'role', necesitamos convertirlo a Enum.
+        // Asumiremos un rol por defecto si no viene especificado o si es el registro inicial.
+        // Si el rol viene en el DTO, necesitarías un DTO. Por ahora, asumiremos que se asigna 'CLIENT' por defecto.
 
-        // ⚠️ ASIGNAR UN ROL POR DEFECTO ⚠️
-        newUser.setRole("CLIENT");
-
-        // Si tienes este campo, descoméntalo
-        // newUser.setCreationDate(LocalDateTime.now());
+        // Usamos .valueOf() para convertir el String "CLIENT" al Enum Role.CLIENT
+        // Si el rol viniera en newUser, sería: Role.valueOf(newUser.getRoleString().toUpperCase())
+        newUser.setRole(Role.valueOf("CLIENT"));
 
         return userRepository.save(newUser);
     }
 
-    // Método auxiliar para el login
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    // Método de autenticación (login)
+    public User authenticate(String username, String password) {
+        User user = userRepository.findByUsername(username);
+
+        // Verificación de existencia y contraseña
+        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+            return user;
+        }
+        return null;
     }
 }

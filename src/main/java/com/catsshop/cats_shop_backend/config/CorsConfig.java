@@ -19,10 +19,13 @@ public class CorsConfig {
                                 "http://localhost:3000",
                                 // 2. El ORIGEN CORREGIDO y actual de tu frontend en Vercel
                                 "https://frontend-ev3-zbku.vercel.app"
-                                // Nota: No se necesitas el dominio de Render en esta lista.
                         )
-                        .allowedMethods("GET","POST","PUT","DELETE")
-                        .allowedHeaders("*");
+                        // Métodos HTTP permitidos
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        // Cabeceras permitidas (como Content-Type y Authorization)
+                        .allowedHeaders("*")
+                        // **CLAVE:** Permite el envío de cookies o, más importante, la cabecera Authorization (JWT)
+                        .allowCredentials(true);
             }
         };
     }
