@@ -40,7 +40,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // ⚠️ CÓDIGO CORREGIDO: SE AGREGAN PRODUCTOS Y REGISTRO A PERMITALL
                         .requestMatchers(
+                                "/api/productos", // Permite ver la tienda sin login
+                                "/api/auth/register", // Permite registrarse
                                 "/api/auth/login",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
@@ -74,16 +77,11 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    // 🔥 CONFIGURACIÓN DE CORS PARA REACT + VERCEL + RENDER 🔥
+    // CONFIGURACIÓN DE CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-
-        // Permitir peticiones del frontend en Vercel y local
-        config.setAllowedOriginPatterns(List.of(
-                "*"
-        ));
-
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowCredentials(true);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
