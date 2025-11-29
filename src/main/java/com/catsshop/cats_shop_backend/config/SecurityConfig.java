@@ -1,6 +1,6 @@
 package com.catsshop.cats_shop_backend.config;
 
-import com.catsshop.cats_shop_backend.security.JwtFilter;
+import com.catsshop.cats_shop_backend.util.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

@@ -1,4 +1,4 @@
-package com.catsshop.cats_shop_backend.security;
+package com.catsshop.cats_shop_backend.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
