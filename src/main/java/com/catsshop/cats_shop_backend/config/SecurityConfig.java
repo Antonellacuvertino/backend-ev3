@@ -19,7 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.List;
 
 @Configuration
@@ -40,14 +39,16 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ⚠️ CÓDIGO CORREGIDO: SE AGREGAN PRODUCTOS Y REGISTRO A PERMITALL
+                        // ⚠️ RUTAS PÚBLICAS PARA REGISTRO Y TIENDA ⚠️
                         .requestMatchers(
-                                "/api/productos", // Permite ver la tienda sin login
-                                "/api/auth/register", // Permite registrarse
+                                "/api/auth/register", // FIX: Permite el registro de usuarios
                                 "/api/auth/login",
+                                "/api/productos",
+                                "/api/categorias",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
+                        // Cualquier otra solicitud requiere un token JWT válido
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -77,7 +78,6 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    // CONFIGURACIÓN DE CORS
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
