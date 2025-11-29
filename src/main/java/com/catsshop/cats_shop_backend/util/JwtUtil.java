@@ -1,12 +1,15 @@
 package com.catsshop.cats_shop_backend.util;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Map; // 👈 NECESARIO PARA EL MAP DE CLAIMS
 
 @Component
 public class JwtUtil {
@@ -22,18 +25,28 @@ public class JwtUtil {
         this.expiration = expiration;
     }
 
-    public String generateToken(String username, String role) {
+    /**
+     * Genera un token JWT incluyendo claims personalizados.
+     * @param claims Mapa de claims (ej: userId, role)
+     * @param subject El sujeto principal (username)
+     * @return El JWT generado
+     */
+    // ⚠️ MÉTODO CORREGIDO: ACEPTA MAP Y STRING ⚠️
+    public String generateToken(Map<String, Object> claims, String subject) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
-                .setSubject(username)
-                .claim("role", role)
+                .setClaims(claims)           // Usa el mapa de claims
+                .setSubject(subject)         // Usa el username como sujeto
                 .setIssuedAt(now)
                 .setExpiration(exp)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    // Los demás métodos (getClaims, validate, getUsername, getRole) permanecen igual
+    // ya que dependen de los claims que ahora están incluidos en el token.
 
     public Claims getClaims(String token) {
         return Jwts.parserBuilder()
@@ -56,6 +69,8 @@ public class JwtUtil {
         return getClaims(token).getSubject();
     }
 
+    // Nota: Si el rol es un String, este método funciona.
+    // Si hubieras usado .claim("role", role) en el generador, seguiría funcionando.
     public String getRole(String token) {
         return (String) getClaims(token).get("role");
     }

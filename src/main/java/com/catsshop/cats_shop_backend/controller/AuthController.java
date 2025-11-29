@@ -2,7 +2,7 @@ package com.catsshop.cats_shop_backend.controller;
 
 import com.catsshop.cats_shop_backend.model.User;
 import com.catsshop.cats_shop_backend.service.AuthService;
-import com.catsshop.cats_shop_backend.util.JwtUtil;
+import com.catsshop.cats_shop_backend.util.JwtUtil; // Asegúrate de que esta clase exista en el paquete util
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ public class AuthController {
     private AuthService authService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtUtil jwtUtil; // Necesitas esta clase en el paquete util
 
     // Endpoint de registro
     @PostMapping("/register")
@@ -31,10 +31,9 @@ public class AuthController {
             Map<String, Object> claims = new HashMap<>();
             claims.put("userId", registeredUser.getId());
             claims.put("username", registeredUser.getUsername());
-
-            // CORRECCIÓN CLAVE: Convertir el Enum Role a String usando .name()
             claims.put("role", registeredUser.getRole().name());
 
+            // ⚠️ CORRECCIÓN (Línea ~38) ⚠️: Solo pasamos claims (Map) y username (String)
             String token = jwtUtil.generateToken(claims, registeredUser.getUsername());
 
             Map<String, Object> response = new HashMap<>();
@@ -63,10 +62,9 @@ public class AuthController {
             Map<String, Object> claims = new HashMap<>();
             claims.put("userId", user.getId());
             claims.put("username", user.getUsername());
-
-            // CORRECCIÓN CLAVE: Convertir el Enum Role a String usando .name()
             claims.put("role", user.getRole().name());
 
+            // ⚠️ CORRECCIÓN (Línea ~70) ⚠️: Solo pasamos claims (Map) y username (String)
             String token = jwtUtil.generateToken(claims, user.getUsername());
 
             Map<String, Object> response = new HashMap<>();

@@ -1,11 +1,13 @@
 package com.catsshop.cats_shop_backend.service;
 
-import com.catsshop.cats_shop_backend.model.Role; // Asegúrate de importar Role
+import com.catsshop.cats_shop_backend.model.Role;
 import com.catsshop.cats_shop_backend.model.User;
 import com.catsshop.cats_shop_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional; // Necesitas importar Optional
 
 @Service
 public class AuthService {
@@ -17,15 +19,8 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     public User registerNewUser(User newUser) {
-        // Codificar la contraseña antes de guardar
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-
-        // El error estaba aquí: si el DTO tiene un String 'role', necesitamos convertirlo a Enum.
-        // Asumiremos un rol por defecto si no viene especificado o si es el registro inicial.
-        // Si el rol viene en el DTO, necesitarías un DTO. Por ahora, asumiremos que se asigna 'CLIENT' por defecto.
-
-        // Usamos .valueOf() para convertir el String "CLIENT" al Enum Role.CLIENT
-        // Si el rol viniera en newUser, sería: Role.valueOf(newUser.getRoleString().toUpperCase())
+        // Asume el rol 'CLIENT' si no se especifica.
         newUser.setRole(Role.valueOf("CLIENT"));
 
         return userRepository.save(newUser);
@@ -33,12 +28,23 @@ public class AuthService {
 
     // Método de autenticación (login)
     public User authenticate(String username, String password) {
-        User user = userRepository.findByUsername(username);
+        // Asumimos que userRepository.findByUsername devuelve Optional<User>
+        Optional<User> optionalUser = userRepository.findByUsername(username);
 
-        // Verificación de existencia y contraseña
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-            return user;
+        // ⚠️ CORRECCIÓN (Línea ~36) ⚠️: Desempaquetamos el Optional de forma segura
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (passwordEncoder.matches(password, user.getPassword())) {
+                return user;
+            }
         }
         return null;
+
+        // Alternativa más concisa:
+        // User user = userRepository.findByUsername(username).orElse(null);
+        // if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+        //     return user;
+        // }
+        // return null;
     }
 }
